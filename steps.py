@@ -9,12 +9,17 @@ import pygame as pg
 WIDTH = 1600  # ゲームウィンドウの幅
 HEIGHT = 900  # ゲームウィンドウの高さ
 
+lr = (-1, +1)  # 右向きか左向きかを表す定数
 
 class Player(pg.sprite.Sprite):
     """
     プレイヤーに関するクラス
     """
-    def __init__(self, pos):
+    def __init__(self, pos: tuple):
+        """
+        プレイヤー画像Surfaceを作成し、rectを設定する
+        引数：プレイヤーの位置
+        """
         super().__init__()
         self.image = pg.image.load("ex05/fig/3.png")
         self.rect = self.image.get_rect()
@@ -28,27 +33,35 @@ class Player(pg.sprite.Sprite):
         self.jump_max = 2
 
     def update(self, screen: pg.Surface):
+        """
+        プレイヤーを移動させる
+        引数：ゲームウィンドウのSurface
+        """
         screen.blit(self.image, self.rect.center)
-
-    def move(self, dx, dy):
-        self.rect.move_ip(dx, dy)
-
 
 
 class Step(pg.sprite.Sprite):
     """
     階段に関するクラス
     """
-    def __init__(self, pos):
+    def __init__(self, pos: tuple):
+        """
+        階段画像Surfaceを作成し、rectを設定する
+        引数：階段の位置
+        """
         super().__init__()
-        # 200, 50 の赤い四角形を作成
         self.size = (150, 30)
         self.image = pg.Surface(self.size)
         pg.draw.rect(self.image, (255, 0, 0), [0, 0, *self.size])
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        self.rect.centerx
 
     def update(self, screen: pg.Surface):
+        """
+        階段を移動させる
+        引数：ゲームウィンドウのSurface
+        """
         screen.blit(self.image, self.rect.center)
 
 
@@ -64,6 +77,7 @@ def main():
     clock = pg.time.Clock()
 
     first_flag = True
+    sx = 800
 
     while True:
         key_lst = pg.key.get_pressed()
@@ -71,17 +85,26 @@ def main():
             if event.type == pg.QUIT:
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                if first_flag:
-                    first_flag = False
-                    steps.add(Step((900,400)))
-                    steps.add(Step((1100,300)))
-                    steps.add(Step((1300,200)))
-                else:
-                    player.update(screen)
-                    steps.add(Step((1500,100)))
-                    player.move(200, -100)
+                player.update(screen)
+                rand = random.choice(lr)  # 左右どちらに作成するかをランダムに決める
+                sx += 200 * rand
+                if sx < 0 or sx+150 > WIDTH:  # 画面外に作成しないようにする
+                    sx -= 400 * rand
+                steps.add(Step((sx, 0)))  # 階段を作成
+                for step in steps:
+                    step.rect.move_ip(0, 100)  # 100ずつ下に移動する
+                    if step.rect.top > HEIGHT:  # 画面外に出たら削除する
+                        step.kill()
 
         screen.blit(bg_img, [0, 0])
+        if first_flag:  # 最初の階段を作成
+            first_flag = False  # 2回目以降は作成しない
+            for sy in range(400, 0, -100):  # 400, 300, 200, 100の4個を作成
+                rand = random.choice(lr)    # 左右どちらに作成するかをランダムに決める
+                sx += 200 * rand
+                if sx < 0 or sx+150 > WIDTH:  # 画面外に作成しないようにする
+                    sx -= 400 * rand
+                steps.add(Step((sx, sy)))  # 階段を作成
 
         player.update(screen)
         steps.update(screen)
