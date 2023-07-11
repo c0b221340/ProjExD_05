@@ -33,6 +33,11 @@ class Player(pg.sprite.Sprite):
     def move(self, dx, dy):
         self.rect.move_ip(dx, dy)
 
+    def change_img(self,screen: pg.Surface):  #失敗画像に変更する
+        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/8.png"), 0, 2.0)
+        screen.blit(self.image, self.rect)
+
+
 
 
 class Step(pg.sprite.Sprite):
@@ -51,7 +56,6 @@ class Step(pg.sprite.Sprite):
     def update(self, screen: pg.Surface):
         screen.blit(self.image, self.rect.center)
 
-
 def main():
     pg.display.set_caption("こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -61,6 +65,7 @@ def main():
     steps = pg.sprite.Group()
 
     tmr = 0
+    score = 0
     clock = pg.time.Clock()
 
     first_flag = True
@@ -75,14 +80,25 @@ def main():
                     first_flag = False
                     steps.add(Step((900,400)))
                     steps.add(Step((1100,300)))
-                    steps.add(Step((1300,200)))
+                    # steps.add(Step((1300,200)))
                 else:
-                    player.update(screen)
-                    steps.add(Step((1500,100)))
-                    player.move(200, -100)
-
+                    score += 1
+                    # player.update(screen)
+                    # steps.add(Step((1500,100)))
+                    player.move(150, -100)
+        print(len(pg.sprite.spritecollide(player,steps , False, collided=pg.sprite.collide_rect)))
+        
+        if score != 0:  #初期状態を除く
+            if len(pg.sprite.spritecollide(player,steps , False)) == 0:  #階段に乗っていないとき
+                screen.blit(bg_img, [0, 0])  #背景を描画
+                steps.update(screen)  #階段を描画
+                player.change_img(screen)  #失敗画像に変更
+                pg.display.update()  
+                time.sleep(2)
+                return
+        #print(player.rect, 1)
+        #print(*[s.rect for s in steps], 2)　　＃画像が重なっているかの確認
         screen.blit(bg_img, [0, 0])
-
         player.update(screen)
         steps.update(screen)
         pg.display.update()
