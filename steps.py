@@ -19,16 +19,14 @@ class Player(pg.sprite.Sprite):
         self.image = pg.image.load("ex05/fig/3.png")
         self.rect = self.image.get_rect()
         self.rect.center = pos
-        self.vx = 0
-        self.vy = 0
-        self.speed = 5
-        self.dir = 0
-        self.jump = 0
-        self.jump_power = 20
-        self.jump_max = 2
+        self.muki = [self.image, pg.transform.flip(self.image, True, False)]
+        self.count = 0
 
-    def update(self, screen: pg.Surface):
-        screen.blit(self.image, self.rect.center)
+    def update(self, screen: pg.Surface, count:int):
+        """
+        プレイヤーの向きの更新
+        """
+        screen.blit(self.muki[count%2], self.rect.center) 
 
     def move(self, dx, dy):
         self.rect.move_ip(dx, dy)
@@ -60,6 +58,7 @@ def main():
     player = Player((800,470))
     steps = pg.sprite.Group()
 
+    count = 0
     tmr = 0
     clock = pg.time.Clock()
 
@@ -77,13 +76,16 @@ def main():
                     steps.add(Step((1100,300)))
                     steps.add(Step((1300,200)))
                 else:
-                    player.update(screen)
+                    player.update(screen, count)
                     steps.add(Step((1500,100)))
                     player.move(200, -100)
+            if event.type == pg.KEYDOWN and event.key == pg.K_LCTRL: #左ctrl押下で左右の変更
+                count += 1
+                player.update(screen, count)
 
         screen.blit(bg_img, [0, 0])
 
-        player.update(screen)
+        player.update(screen, count)
         steps.update(screen)
         pg.display.update()
         tmr += 1
