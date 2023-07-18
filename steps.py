@@ -9,7 +9,7 @@ import pygame as pg
 WIDTH = 1600  # ゲームウィンドウの幅
 HEIGHT = 900  # ゲームウィンドウの高さ
 
-lr = (-1, +1)  # 右向きか左向きかを表す定数
+lr = (+1, -1)  # 右向きか左向きかを表す定数
 
 class Player(pg.sprite.Sprite):
     """
@@ -38,7 +38,7 @@ class Player(pg.sprite.Sprite):
         self.rect.move_ip(dx, dy)
         
     def change_img(self,screen: pg.Surface):  #失敗画像に変更する
-        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/8.png"), 0, 2.0)
+        self.image = pg.image.load(f"ex05/fig/8.png")
         screen.blit(self.image, self.rect)
 
 
@@ -128,7 +128,7 @@ def main():
     bg_img = pg.image.load("ex05/fig/pg_bg.jpg")
     #空の絵
     bg_img2 = pg.image.load("ex05/fig/Untitled2_20230711183506.png")
-    player = Player((800,470))
+    player = Player((840,465))
     steps = pg.sprite.Group()
 
     count = 0
@@ -170,10 +170,11 @@ def main():
                     if step.rect.top > HEIGHT:  # 画面外に出たら削除する
                         step.kill()
                 by+=100
+                score.score_up(1)
+                player.move(200 * lr[count%2], 0)
             if event.type == pg.KEYDOWN and event.key == pg.K_LCTRL: #左ctrl押下で左右の変更
                 count += 1
                 player.update(screen, count)
-                score.score_up(1)
 
         if first_flag:  # 最初の階段を作成
             first_flag = False  # 2回目以降は作成しない
@@ -190,9 +191,21 @@ def main():
 
         if jump == True:  #初期状態を除く
             if len(pg.sprite.spritecollide(player,steps , False)) == 0:  #階段に乗っていないとき
-                screen.blit(bg_img, [0, 0])  #背景を描画
+                if score.score >= 4:
+                    screen.blit(bg_img2, [0, by])  #背景を描画
+                else:
+                    screen.blit(bg_img, [0, by])
                 steps.update(screen)  #階段を描画
+                score.update(screen)
+                limit.update(screen)
                 player.change_img(screen)  #失敗画像に変更
+                #  GameOverと表示する
+                font = pg.font.SysFont("hgp創英角ポップ体", 200)
+                color = (0, 0, 255)
+                img = font.render("GameOver", 0, color)
+                rct = img.get_rect()
+                rct.center = (WIDTH/2, HEIGHT-700)
+                screen.blit(img, rct)
                 pg.display.update()  
                 time.sleep(2)
                 return     
