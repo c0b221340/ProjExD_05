@@ -36,6 +36,10 @@ class Player(pg.sprite.Sprite):
         
     def move(self, dx, dy):
         self.rect.move_ip(dx, dy)
+        
+    def change_img(self,screen: pg.Surface):  #失敗画像に変更する
+        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/8.png"), 0, 2.0)
+        screen.blit(self.image, self.rect)
 
 
 class Score_my():
@@ -64,6 +68,7 @@ class Score_my():
         self.img = self.font.render(f"SCORE:{self.score}", 0, self.color)
         screen.blit(self.img, self.rct)
 
+        
 class Limit:
     """
     時間に関するクラス
@@ -90,7 +95,7 @@ class Limit:
             self.limit=0
         else:
             self.limit-=1/50
-        
+
 
 class Step(pg.sprite.Sprite):
     """
@@ -126,6 +131,7 @@ def main():
 
     count = 0
     tmr = 0
+    jump = False
     clock = pg.time.Clock()
 
     limit=Limit()
@@ -140,6 +146,7 @@ def main():
             if event.type == pg.QUIT:
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                jump = True
                 player.update(screen, count)
                 rand = random.choice(lr)  # 左右どちらに作成するかをランダムに決める
                 sx += 200 * rand
@@ -165,6 +172,15 @@ def main():
                     sx -= 400 * rand
                 steps.add(Step((sx, sy)))  # 階段を作成
 
+        if jump == True:  #初期状態を除く
+            if len(pg.sprite.spritecollide(player,steps , False)) == 0:  #階段に乗っていないとき
+                screen.blit(bg_img, [0, 0])  #背景を描画
+                steps.update(screen)  #階段を描画
+                player.change_img(screen)  #失敗画像に変更
+                pg.display.update()  
+                time.sleep(2)
+                return     
+               
         player.update(screen, count)
         score.update(screen)
         limit.update(screen)
