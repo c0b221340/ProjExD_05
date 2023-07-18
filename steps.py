@@ -39,6 +39,10 @@ class Player(pg.sprite.Sprite):
         """
         screen.blit(self.image, self.rect.center)
 
+    def change_img(self,screen: pg.Surface):  #失敗画像に変更する
+        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/8.png"), 0, 2.0)
+        screen.blit(self.image, self.rect)
+
 
 class Step(pg.sprite.Sprite):
     """
@@ -74,6 +78,7 @@ def main():
     steps = pg.sprite.Group()
 
     tmr = 0
+    score = 0
     clock = pg.time.Clock()
 
     first_flag = True
@@ -86,6 +91,7 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 player.update(screen)
+                score += 1
                 rand = random.choice(lr)  # 左右どちらに作成するかをランダムに決める
                 sx += 200 * rand
                 if sx < 0 or sx+150 > WIDTH:  # 画面外に作成しないようにする
@@ -106,6 +112,15 @@ def main():
                     sx -= 400 * rand
                 steps.add(Step((sx, sy)))  # 階段を作成
 
+        if score != 0:  #初期状態を除く
+            if len(pg.sprite.spritecollide(player,steps , False)) == 0:  #階段に乗っていないとき
+                screen.blit(bg_img, [0, 0])  #背景を描画
+                steps.update(screen)  #階段を描画
+                player.change_img(screen)  #失敗画像に変更
+                pg.display.update()  
+                time.sleep(2)
+                return     
+               
         player.update(screen)
         steps.update(screen)
         pg.display.update()
