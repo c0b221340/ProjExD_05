@@ -124,8 +124,10 @@ class Step(pg.sprite.Sprite):
 def main():
     pg.display.set_caption("こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
+    #地上の絵
     bg_img = pg.image.load("ex05/fig/pg_bg.jpg")
-
+    #空の絵
+    bg_img2 = pg.image.load("ex05/fig/Untitled2_20230711183506.png")
     player = Player((800,470))
     steps = pg.sprite.Group()
 
@@ -133,14 +135,24 @@ def main():
     tmr = 0
     jump = False
     clock = pg.time.Clock()
-
     limit=Limit()
     score = Score_my()
-
     first_flag = True
     sx = 800
 
+    #最初の背景を生成するための判断材料
+    first_screen = True
+    by = 0
+
     while True:
+        #最初だけ地上の絵を表示して後は空のみを表示
+        if first_screen == True:
+            screen.blit(bg_img, [0,by])
+            if by >= 900:
+                first_screen = False
+        else:
+            screen.blit(bg_img2,[0,by])
+        screen.blit(bg_img2,[0,by-900])
         key_lst = pg.key.get_pressed()
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -157,12 +169,12 @@ def main():
                     step.rect.move_ip(0, 100)  # 100ずつ下に移動する
                     if step.rect.top > HEIGHT:  # 画面外に出たら削除する
                         step.kill()
+                by+=100
             if event.type == pg.KEYDOWN and event.key == pg.K_LCTRL: #左ctrl押下で左右の変更
                 count += 1
                 player.update(screen, count)
                 score.score_up(1)
 
-        screen.blit(bg_img, [0, 0])
         if first_flag:  # 最初の階段を作成
             first_flag = False  # 2回目以降は作成しない
             for sy in range(400, 0, -100):  # 400, 300, 200, 100の4個を作成
@@ -171,6 +183,10 @@ def main():
                 if sx < 0 or sx+150 > WIDTH:  # 画面外に作成しないようにする
                     sx -= 400 * rand
                 steps.add(Step((sx, sy)))  # 階段を作成
+
+        #座標が絵の一番上までいったときxの値を変えることで絵の無限生成をする(座標リセット)
+        if by == 1000:
+            by = 100
 
         if jump == True:  #初期状態を除く
             if len(pg.sprite.spritecollide(player,steps , False)) == 0:  #階段に乗っていないとき
@@ -188,7 +204,6 @@ def main():
         pg.display.update()
         tmr += 1
         clock.tick(50)
-
 
 if __name__ == "__main__":
     pg.init()
