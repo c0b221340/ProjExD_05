@@ -55,17 +55,27 @@ class Step(pg.sprite.Sprite):
 def main():
     pg.display.set_caption("こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
+    #地上の絵
     bg_img = pg.image.load("ex05/fig/pg_bg.jpg")
-
+    #空の絵
+    bg_img2 = pg.image.load("ex05/fig/Untitled2_20230711183506.png")
     player = Player((800,470))
     steps = pg.sprite.Group()
-
     tmr = 0
     clock = pg.time.Clock()
-
     first_flag = True
-
+    #最初の背景を生成するための判断材料
+    first_screen = True
+    x = 0
     while True:
+        #最初だけ地上の絵を表示して後は空のみを表示
+        if first_screen == True:
+            screen.blit(bg_img, [0,x])
+            if x == 900:
+                first_screen = False
+        else:
+            screen.blit(bg_img2,[0,x])
+        screen.blit(bg_img2,[0,x-900])
         key_lst = pg.key.get_pressed()
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -76,19 +86,21 @@ def main():
                     steps.add(Step((900,400)))
                     steps.add(Step((1100,300)))
                     steps.add(Step((1300,200)))
-                else:
+                    print(first_flag)
+                else: 
+                    #座標を100増やす
+                    x+=100
                     player.update(screen)
                     steps.add(Step((1500,100)))
-                    player.move(200, -100)
-
-        screen.blit(bg_img, [0, 0])
+            #座標が絵の一番上までいったときxの値を変えることで絵の無限生成をする(座標リセット)
+            if x == 1000:
+                x = 100
 
         player.update(screen)
         steps.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
-
 
 if __name__ == "__main__":
     pg.init()
