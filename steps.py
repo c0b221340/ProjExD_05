@@ -73,11 +73,11 @@ class Limit:
     """
     時間に関するクラス
     """
-    def __init__(self):
+    def __init__(self, limit=300):
         """
         制限時間の初期設定を300にする
         """
-        self.limit = 300
+        self.limit = limit
         self.font = pg.font.SysFont("hgp創英角ポップ体", 50)
         self.color = (255, 0, 0)
         self.img = self.font.render(f"LIMIT:{self.limit}", 0, self.color)
@@ -130,18 +130,15 @@ def main():
     bg_img2 = pg.image.load("ex05/fig/Untitled2_20230711183506.png")
     player = Player((840,465))
     steps = pg.sprite.Group()
-
     count = 0
     tmr = 0
     jump = False
     clock = pg.time.Clock()
-    limit=Limit()
+    limit=Limit(60)
     score = Score_my()
     first_flag = True
-    sx = 800
-
-    #最初の背景を生成するための判断材料
-    first_screen = True
+    sx = 800    
+    first_screen = True  #最初の背景を生成するための判断材料
     by = 0
 
     while True:
@@ -190,9 +187,9 @@ def main():
             by = 100
 
         if jump == True:  #初期状態を除く
-            if len(pg.sprite.spritecollide(player,steps , False)) == 0:  #階段に乗っていないとき
+            if len(pg.sprite.spritecollide(player,steps , False)) == 0 or limit.limit < 1:  #階段に乗っていないときか制限時間が0のとき
                 if score.score >= 4:
-                    screen.blit(bg_img2, [0, by])  #背景を描画
+                    screen.blit(bg_img2, [0, 0])  #背景を描画
                 else:
                     screen.blit(bg_img, [0, by])
                 steps.update(screen)  #階段を描画
@@ -209,10 +206,10 @@ def main():
                 pg.display.update()  
                 time.sleep(2)
                 return     
+            limit.update(screen)
                
         player.update(screen, count)
         score.update(screen)
-        limit.update(screen)
         steps.update(screen)
         pg.display.update()
         tmr += 1
