@@ -24,7 +24,7 @@ class Player(pg.sprite.Sprite):
         self.image = pg.image.load("ex05/fig/3.png")
         self.rect = self.image.get_rect()
         self.rect.center = pos
-        self.muki = [pg.transform.flip(self.image, True, False), self.image]
+        self.dire = [pg.transform.flip(self.image, True, False), self.image]
         self.count = 0
 
     def update(self, screen: pg.Surface, count: int) -> None:
@@ -33,7 +33,7 @@ class Player(pg.sprite.Sprite):
         引数１: ゲームウィンドウのSurface
         引数２: コントロールの押された回数
         """
-        screen.blit(self.muki[count%2], self.rect.center) 
+        screen.blit(self.dire[count%2], self.rect.center) 
         
     def move(self, dx: int, dy: int) -> None:
         """
@@ -212,10 +212,10 @@ def main():
                 #  GameOverと表示する
                 font = pg.font.SysFont("hgp創英角ポップ体", 200)
                 color = (0, 0, 255)  # 青色
-                img = font.render("GameOver", 0, color)
-                rct = img.get_rect()
-                rct.center = (WIDTH/2, HEIGHT-700)  
-                screen.blit(img, rct)
+                image = font.render("GameOver", 0, color)
+                rect = image.get_rect()
+                rect.center = (WIDTH/2, HEIGHT-700)  
+                screen.blit(image, rect)
                 pg.display.update()  
                 time.sleep(2)  # 2秒間待つ
                 return     
