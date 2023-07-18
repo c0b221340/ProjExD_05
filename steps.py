@@ -24,23 +24,19 @@ class Player(pg.sprite.Sprite):
         self.image = pg.image.load("ex05/fig/3.png")
         self.rect = self.image.get_rect()
         self.rect.center = pos
-        self.vx = 0
-        self.vy = 0
-        self.speed = 5
-        self.dir = 0
-        self.jump = 0
-        self.jump_power = 20
-        self.jump_max = 2
+        self.muki = [pg.transform.flip(self.image, True, False), self.image]
+        self.count = 0
 
-    def update(self, screen: pg.Surface):
+    def update(self, screen: pg.Surface, count:int):
         """
-        プレイヤーを移動させる
-        引数：ゲームウィンドウのSurface
+        プレイヤーの向きの更新
+        引数: コントロールの押された回数
         """
-        screen.blit(self.image, self.rect.center)
-    
+        screen.blit(self.muki[count%2], self.rect.center) 
+        
     def move(self, dx, dy):
         self.rect.move_ip(dx, dy)
+
 
 class Score_my():
 
@@ -57,8 +53,7 @@ class Score_my():
         self.img = self.font.render(f"SCORE:{self.score}", 0, self.color)
         self.rct = self.img.get_rect()
         self.rct.center = (100, HEIGHT-50)
-        
-    
+       
     def score_up(self, add):
         self.score = self.score + add
 
@@ -129,6 +124,7 @@ def main():
     player = Player((800,470))
     steps = pg.sprite.Group()
 
+    count = 0
     tmr = 0
     clock = pg.time.Clock()
 
@@ -142,10 +138,9 @@ def main():
         key_lst = pg.key.get_pressed()
         for event in pg.event.get():
             if event.type == pg.QUIT:
-
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                player.update(screen)
+                player.update(screen, count)
                 rand = random.choice(lr)  # 左右どちらに作成するかをランダムに決める
                 sx += 200 * rand
                 if sx < 0 or sx+150 > WIDTH:  # 画面外に作成しないようにする
@@ -155,6 +150,9 @@ def main():
                     step.rect.move_ip(0, 100)  # 100ずつ下に移動する
                     if step.rect.top > HEIGHT:  # 画面外に出たら削除する
                         step.kill()
+            if event.type == pg.KEYDOWN and event.key == pg.K_LCTRL: #左ctrl押下で左右の変更
+                count += 1
+                player.update(screen, count)
                 score.score_up(1)
 
         screen.blit(bg_img, [0, 0])
@@ -167,7 +165,7 @@ def main():
                     sx -= 400 * rand
                 steps.add(Step((sx, sy)))  # 階段を作成
 
-        player.update(screen)
+        player.update(screen, count)
         score.update(screen)
         limit.update(screen)
         steps.update(screen)
